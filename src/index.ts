@@ -1,6 +1,6 @@
 import WebSocket, { WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080, host: "0.0.0.0" });
 
 type DB = {
   [key: string]: Room;
