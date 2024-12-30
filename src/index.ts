@@ -1,6 +1,9 @@
 import WebSocket, { WebSocketServer } from "ws";
+import http from "http";
 
-const wss = new WebSocketServer({ port: 8080, host: "0.0.0.0" });
+const server = http.createServer();
+
+const wss = new WebSocketServer({ server: server });
 
 type DB = {
   [key: string]: Room;
@@ -75,7 +78,22 @@ wss.on("connection", function connection(ws) {
           JSON.stringify({ type: "error", data: "room does not exist" })
         );
       }
-      //   If room has no songs then add the song and set it as active
+
+      // Check if the song already exists in the room
+      const songExists = db[roomId].songs.some(
+        (existingSong) => existingSong.id === song.id
+      );
+
+      if (songExists) {
+        return ws.send(
+          JSON.stringify({
+            type: "song_already_exists",
+            data: "This song is already in the queue.",
+          })
+        );
+      }
+
+      // If the room has no songs, add the song and set it as active
       if (db[roomId].songs.length === 0) {
         db[roomId].songs.push({ ...song, votes: [], isActive: true });
         db[roomId].users.forEach((user) => {
@@ -168,4 +186,8 @@ wss.on("connection", function connection(ws) {
   });
   console.log("connected");
   ws.send("Connected!");
+});
+
+server.listen(8080, () => {
+  console.log("Server is listening on port 8080");
 });
