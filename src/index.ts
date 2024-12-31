@@ -32,7 +32,6 @@ wss.on("connection", function connection(ws) {
   ws.on("message", function message(data) {
     const message = JSON.parse(data.toString());
     if (message.type === "create_room") {
-      console.log("create room");
       const { id, name } = message.data;
       if (db[id]) {
         db[id].users[0] = ws;
@@ -47,12 +46,14 @@ wss.on("connection", function connection(ws) {
       db[id] = { name, admin: ws, songs: [], users: [ws] };
       ws.send(JSON.stringify({ type: "room_created", data: db[id] }));
     } else if (message.type === "join_room") {
-      console.log("join room");
       const { roomId } = message.data;
 
       if (!db[roomId]) {
         return ws.send(
-          JSON.stringify({ type: "error", data: "room does not exist" })
+          JSON.stringify({
+            type: "room_not_found",
+            data: "Room does not exist",
+          })
         );
       }
 
@@ -63,7 +64,6 @@ wss.on("connection", function connection(ws) {
       }
       ws.send(JSON.stringify({ type: "song_updated", data: db[roomId].songs }));
     } else if (message.type === "add_song") {
-      console.log("add song");
       const { roomId, song } = message.data;
 
       if (!db[roomId]) {
@@ -132,7 +132,6 @@ wss.on("connection", function connection(ws) {
         );
       });
     } else if (message.type === "down_vote") {
-      console.log("down vote");
       const { roomId, songId, userId } = message.data;
       if (!db[roomId]) {
         return ws.send(
@@ -158,7 +157,6 @@ wss.on("connection", function connection(ws) {
         );
       });
     } else if (message.type === "on_end") {
-      console.log("on end");
       const { roomId } = message.data;
       db[roomId].songs = db[roomId].songs.filter((song) => !song.isActive);
       if (db[roomId].songs.length > 0) {
