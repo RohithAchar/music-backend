@@ -5,6 +5,8 @@ const server = http.createServer();
 
 const wss = new WebSocketServer({ server: server });
 
+const PORT = process.env.PORT || 8080;
+
 type DB = {
   [key: string]: Room;
 };
@@ -179,6 +181,6 @@ wss.on("connection", function connection(ws) {
   ws.send("Connected!");
 });
 
-server.listen(8080, () => {
-  console.log("Server is listening on port 8080");
+server.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
