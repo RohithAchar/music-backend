@@ -59,7 +59,10 @@ wss.on("connection", function connection(ws) {
         );
       }
 
-      db[roomId].users.push(ws);
+      const userExists = db[roomId].users.some((user) => user === ws);
+      if (!userExists) {
+        db[roomId].users.push(ws);
+      }
       const activeSong = db[roomId].songs.find((song) => song.isActive);
       if (activeSong) {
         ws.send(JSON.stringify({ type: "active_song", data: activeSong }));
